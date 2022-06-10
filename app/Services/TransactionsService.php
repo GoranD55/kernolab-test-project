@@ -9,7 +9,7 @@ use App\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
-class TransactionsService
+final class TransactionsService
 {
     protected Request $request;
 
@@ -21,9 +21,12 @@ class TransactionsService
             throw new LimitForCreatingTransactionException('You have reached the transaction limit');
         }
 
+        $commissionService = new CommissionService();
+        $feePercentage = $commissionService->getCurrentFeePercentage($request->input('user_id'));
+
         return Transaction::create(
             array_merge($request->all(), [
-                'fee' => 5,
+                'fee' => $commissionService->calculateFeeValue($request->input('amount'), $feePercentage),
                 'status' => TransactionStatusEnum::NEW
             ])
         );
