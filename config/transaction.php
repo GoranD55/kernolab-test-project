@@ -6,4 +6,5 @@ return [
     'max_total_amount_for_currency' => env('MAX_TOTAL_AMOUNT_FOR_CURRENCY', 1000),
     'low_fee_percentage' => 5,
     'high_fee_percentage' => 10,
+    'submit_code' => env('TRANSACTION_SUBMIT_CODE', 111),
 ];

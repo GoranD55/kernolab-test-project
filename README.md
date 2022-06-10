@@ -62,3 +62,9 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+In the test task:
+Transaction submission with 2FA (assuming code is 111 always for development purposes)
+code, only new transaction can be submitted.
+
+What we need to do if a user has created a few transactions

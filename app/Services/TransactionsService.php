@@ -32,7 +32,14 @@ final class TransactionsService
         );
     }
 
-    public function canUserStoreTransaction(): bool
+    public function submit(int $transaction_id): void
+    {
+        Transaction::query()
+            ->where('id', $transaction_id)
+            ->update(['status' => TransactionStatusEnum::SUBMITTED]);
+    }
+
+    private function canUserStoreTransaction(): bool
     {
         return !$this->isLimitForQuantity() && !$this->isLimitForTotalAmount();
     }
