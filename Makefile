@@ -2,6 +2,8 @@ init:  docker-up app-start
 start: docker-up
 restart: docker-down docker-up
 down: docker-down
+test: app-tests
+test-coverage: app-test-coverage
 migrate: app-migrate
 rollback: app-rollback
 
@@ -24,6 +26,12 @@ app-start:
 	docker-compose exec php-fpm php artisan migrate
 	docker-compose exec php-fpm php artisan db:seed
 	docker-compose restart
+
+app-tests:
+	docker-compose exec php-fpm php artisan test --stop-on-failure
+
+app-test-coverage:
+	docker-compose exec php-fpm vendor/bin/phpunit --coverage-html reports/
 
 permissions:
 	chmod -R 775 storage
