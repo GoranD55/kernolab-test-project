@@ -31,7 +31,9 @@ final class CommissionService
             ->groupBy('currency')
             ->get();
 
-        $isLowFee = $groupedTransactionsAmount->some(fn($item) => $item['total_amount_value'] > 100);
+        $isLowFee = $groupedTransactionsAmount->some(function ($item) {
+            return $item['total_amount_value'] > config('transaction.amount_for_low_fee');
+        });
 
         return $isLowFee
             ? config('transaction.low_fee_percentage')
