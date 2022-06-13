@@ -1,0 +1,154 @@
+openapi: 3.0.3
+info:
+  title: Kernolab API
+  description: Stateless API which allows transaction creation and processing
+  version: "0.1"
+servers:
+  - url: http://localhost:8010
+paths:
+  /transactions:
+    post:
+      summary: Create a new transaction
+      requestBody:
+        $ref: '#/components/requestBodies/CreateTransactionRequestBody'
+      responses:
+        200:
+          $ref: '#/components/responses/CreateTransactionResponseData'
+    get:
+      parameters:
+        - in: query
+          name: user_id
+          required: true
+          schema:
+            type: integer
+          description: The user ID
+      summary: Get list of transactions
+      responses:
+        200:
+          $ref: '#/components/responses/GetTransactionsResponseData'
+  /transactions/submit:
+    post:
+      summary: Submit a transaction
+      requestBody:
+        $ref: '#/components/requestBodies/SubmitTransactionRequestBody'
+      responses:
+        200:
+          $ref: '#/components/responses/SubmitTransactionResponseData'
+  /transactions/{transaction_id}:
+    parameters:
+      - in: path
+        name: transaction_id
+        required: true
+        schema:
+          type: integer
+        description: The transaction ID
+    get:
+      summary: Get a transaction
+      responses:
+        200:
+          $ref: '#/components/responses/GetTransactionResponseData'
+components:
+  schemas:
+    CreateTransactionRequestBody:
+      type: object
+      properties:
+        user_id:
+          type: number
+        details:
+          type: string
+        receiver_account:
+          type: string
+        receiver_name:
+          type: string
+        amount:
+          type: number
+        currency:
+          type: number
+      required:
+        - user_id
+        - details
+        - receiver_account
+        - receiver_name
+        - amount
+        - currency
+    SubmitTransactionRequestBody:
+      type: object
+      properties:
+        transaction_id:
+          type: number
+        code:
+          type: number
+      required:
+        - transaction_id
+        - code
+    Transaction:
+      type: object
+      properties:
+        transaction_id:
+          type: number
+        user_id:
+          type: number
+        details:
+          type: string
+        receiver_account:
+          type: string
+        receiver_name:
+          type: string
+        amount:
+          type: number
+        currency:
+          type: number
+        fee:
+          type: number
+        status:
+          type: string
+    GetTransactionsReturnData:
+      type: array
+      items:
+        $ref: '#/components/schemas/Transaction'
+    GetTransactionReturnData:
+      $ref: '#/components/schemas/Transaction'
+  requestBodies:
+    CreateTransactionRequestBody:
+      required: true
+      description: CreateTransactionRequestBody
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateTransactionRequestBody'
+    SubmitTransactionRequestBody:
+      required: true
+      description: SubmitTransactionRequestBody
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubmitTransactionRequestBody'
+  responses:
+    CreateTransactionResponseData:
+      description: Returning Data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Transaction'
+    SubmitTransactionResponseData:
+      description: Returning Data
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Successful!
+    GetTransactionsResponseData:
+      description: Returning Data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GetTransactionsReturnData'
+    GetTransactionResponseData:
+      description: Returning Data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GetTransactionReturnData'
