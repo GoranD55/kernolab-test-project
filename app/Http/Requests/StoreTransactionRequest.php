@@ -30,7 +30,7 @@ class StoreTransactionRequest extends FormRequest
             'details' => ['required', 'string'],
             'receiver_account' => ['required', 'string'],
             'receiver_name' => ['required', 'string'],
-            'amount' => ['required', 'integer'],
+            'amount' => ['required', 'numeric'],
             'currency' => ['required', Rule::in(CurrencyEnum::values())]
         ];
     }
