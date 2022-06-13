@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\TransactionsController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,10 +14,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::group(['prefix' => 'transactions', 'as' => '.transactions'], function() {
-    Route::post('', [TransactionsController::class, 'store']);
-    Route::post('/submit', [TransactionsController::class, 'submit']);
-    Route::get('', [TransactionsController::class, 'index']);
-    Route::get('{transaction_id}', [TransactionsController::class, 'show']);
+Route::group(['as' => 'api.'], function() {
+    Route::group(['prefix' => 'transactions', 'as' => 'transactions.'], function() {
+        Route::post('', [TransactionsController::class, 'store'])->name('store');
+        Route::post('/submit', [TransactionsController::class, 'submit'])->name('submit');
+        Route::get('', [TransactionsController::class, 'index'])->name('index');
+        Route::get('{transaction_id}', [TransactionsController::class, 'show'])->name('show');
+    });
 });
+
 
