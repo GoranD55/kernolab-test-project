@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTransactionRequest;
 use App\Http\Requests\SubmitTransactionRequest;
+use App\Http\Resources\TransactionResource;
 use App\Services\TransactionsService;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -17,13 +18,12 @@ class TransactionsController extends Controller
         $this->transactionsService = $transactionsService;
     }
 
-    public function store(StoreTransactionRequest $request): JsonResponse
+    public function store(StoreTransactionRequest $request): TransactionResource | JsonResponse
     {
         try {
-            $this->transactionsService->store($request->validated());
+            $transaction = $this->transactionsService->store($request->validated());
 
-            //todo: return transaction resource
-            return response()->json(['status' => 'Okay!']);
+            return new TransactionResource($transaction);
         } catch (Exception $exception) {
             return response()->json([
                 'status' => false,

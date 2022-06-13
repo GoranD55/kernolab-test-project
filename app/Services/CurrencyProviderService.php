@@ -13,7 +13,7 @@ final class CurrencyProviderService
 
         return match ($currencyProvider) {
             'megacash' => $this->changeStringByMegacashProvider($detailsStr),
-            'supercash' => $this->changeStringBySupermoneyProvider($detailsStr),
+            'supermoney' => $this->changeStringBySupermoneyProvider($detailsStr),
             default => $detailsStr,
         };
     }
