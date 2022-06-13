@@ -7,11 +7,22 @@ use App\Exceptions\LimitForCreatingTransactionException;
 use App\Jobs\CompleteTransaction;
 use App\Models\Transaction;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 
 final class TransactionsService
 {
+    public function index(int $user_id): Collection
+    {
+        return Transaction::query()->where('user_id', $user_id)->get();
+    }
+
+    public function show(int $transaction_id): Transaction | null
+    {
+        return Transaction::query()->find($transaction_id);
+    }
+
     public function store(array $requestData): Transaction
     {
         if (!$this->canUserStoreTransaction($requestData)) {

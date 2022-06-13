@@ -6,7 +6,6 @@ use App\Http\Requests\IndexTransactionsRequest;
 use App\Http\Requests\StoreTransactionRequest;
 use App\Http\Requests\SubmitTransactionRequest;
 use App\Http\Resources\TransactionResource;
-use App\Models\Transaction;
 use App\Services\TransactionsService;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -25,13 +24,13 @@ class TransactionsController extends Controller
     {
         $requestData = $request->validated();
         return TransactionResource::collection(
-            Transaction::query()->where('user_id', $requestData['user_id'])->get()
+            $this->transactionsService->index($requestData['user_id'])
         );
     }
 
     public function show(string $transaction_id): TransactionResource | JsonResponse
     {
-        $transaction = Transaction::query()->find($transaction_id);
+        $transaction = $this->transactionsService->show($transaction_id);
         if (!$transaction) {
             return response()->json([
                 'status' => false,
