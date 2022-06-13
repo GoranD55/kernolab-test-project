@@ -1,70 +1,52 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# Kernolab-API
+## First deploy
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+1. Clone repository
+2. Create the `.env` file and copy the `env.example` file to it
+3. Run `make init`
+4. The API is available at http://localhost:8010/
 
-## About Laravel
+#
+## Useful commands:
+### Change files permissions
+`make permissions`
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Docker
+Up docker containers: `make start` <br>
+Down docker containers: `make down` <br>
+Restart docker containers: `make restart`
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Database
+Run migrations: `make migrate`<br>
+Rollback migrations: `make rollback`
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Cache clear
+`make cache-clear`
 
-## Learning Laravel
+### Tests
+Run project tests: `make test` <br>
+Make a coverage report: `make test-coverage`
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+#
+### Notes
 
-## Laravel Sponsors
+In the implementation of this API, the transaction submit request was changed. The transaction_id field was added by
+which we submit the transactions.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+There are only two currencies in this API to work with transactions. Because in real Fintech projects we know which currencies we can use.
+For the tests of this API I decided to leave two
 
-### Premium Partners
+I decided not to implement an endpoint to process all transactions, because in my opinion it's a bad practice
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+In my development, the main logic for working with transactions is carried out in services
 
-## Contributing
+Our transaction providers are stored at in a database table. The logic for working with transaction details and these 
+providers is written in the service, because there is no exact concept of how it should eventually work. 
+And I think this is not the main task
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-
-In the test task:
-Transaction submission with 2FA (assuming code is 111 always for development purposes)
-code, only new transaction can be submitted.
-
-What we need to do if a user has created a few transactions
+Now, each background task work in sync mode. If you want to check the asynchronous execution of a task, do the following steps:
+1. Change the QUEUE_CONNECTION value to the redis.
+2. Run `make restart` to restart project
+3. Run `docker compose exec php-fpm php artisan queue:work`
+Then you can see some event states while transaction is completing
