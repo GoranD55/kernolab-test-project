@@ -4,65 +4,82 @@ namespace App\Services;
 
 use App\Enums\TransactionStatusEnum;
 use App\Exceptions\LimitForCreatingTransactionException;
-use App\Http\Requests\StoreTransactionRequest;
+use App\Jobs\CompleteTransaction;
 use App\Models\Transaction;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 
 final class TransactionsService
 {
-    protected Request $request;
-
-    public function store(StoreTransactionRequest $request): Transaction
+    public function store(array $requestData): Transaction
     {
-        $this->request = $request;
-
-        if (!$this->canUserStoreTransaction()) {
-            throw new LimitForCreatingTransactionException('You have reached the transaction limit');
+        if (!$this->canUserStoreTransaction($requestData)) {
+            throw new LimitForCreatingTransactionException('You have reached the transaction limit', 400);
         }
 
-        $commissionService = new CommissionService();
-        $feePercentage = $commissionService->getCurrentFeePercentage($request->input('user_id'));
+        $commissionService = new CommissionService($requestData['user_id'], $requestData['amount']);
 
-        return Transaction::create(
-            array_merge($request->all(), [
-                'fee' => $commissionService->calculateFeeValue($request->input('amount'), $feePercentage),
-                'status' => TransactionStatusEnum::NEW
-            ])
-        );
+        try {
+            DB::beginTransaction();
+            $transaction = Transaction::create(
+                array_merge($requestData, [
+                    'fee' => $commissionService->getFeeValue(),
+                    'status' => TransactionStatusEnum::NEW
+                ])
+            );
+            DB::commit();
+        } catch (QueryException $exception) {
+            DB::rollback();
+            throw $exception;
+        }
+
+        return $transaction;
     }
 
     public function submit(int $transaction_id): void
     {
-        Transaction::query()
-            ->where('id', $transaction_id)
-            ->update(['status' => TransactionStatusEnum::SUBMITTED]);
+        $transaction = Transaction::query()->findOrFail($transaction_id);
+        try {
+            DB::beginTransaction();
+            $transaction->update(['status' => TransactionStatusEnum::SUBMITTED]);
+
+            dispatch(new CompleteTransaction($transaction));
+            DB::commit();
+        } catch (QueryException $exception) {
+            DB::rollBack();
+            throw $exception;
+        }
     }
 
-    private function canUserStoreTransaction(): bool
+    private function canUserStoreTransaction(array $requestData): bool
     {
-        return !$this->isLimitForQuantity() && !$this->isLimitForTotalAmount();
+        return !$this->isLimitForQuantity($requestData['user_id']) &&
+                !$this->isLimitForTotalAmount($requestData);
     }
 
-    private function isLimitForQuantity(): bool
+    private function isLimitForQuantity(int $user_id): bool
     {
-        $transactionsCountPerPeriod = Transaction::query()->where([
-            ['user_id', $this->request['user_id']],
-            ['created_at', '>=', Carbon::now()->subHour()]
-        ])->count();
+        $transactionsCountPerPeriod = Transaction::query()
+            ->where([
+                ['user_id', $user_id],
+                ['created_at', '>=', Carbon::now()->subHour()]
+            ])->count();
 
         return $transactionsCountPerPeriod >= config('transaction.count_per_period');
     }
 
-    private function isLimitForTotalAmount(): bool
+    private function isLimitForTotalAmount(array $requestData): bool
     {
         $transactions = Transaction::query()
-            ->where('currency', $this->request['currency'])
+            ->where('currency', $requestData['currency'])
             ->select('amount', 'fee')
             ->get();
 
-        // append total amount for a new transaction, result must be less than 1000
+        $commissionService = new CommissionService($requestData['user_id'], $requestData['amount']);
+        $currentTransactionTotalAmount = $commissionService->getFeeValue() + $requestData['amount'];
 
-        return $transactions->sum('total_amount') >= config('transaction.max_total_amount_for_currency');
+        return $transactions->sum('total_amount') + $currentTransactionTotalAmount
+            >= config('transaction.max_total_amount_for_currency');
     }
 }
