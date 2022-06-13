@@ -10,6 +10,7 @@ services:
         working_dir: /application
         volumes:
             - '.:/application'
+            - 'kernolab-mysql-volume:/var/lib/mysql'
         environment:
             - MYSQL_ROOT_PASSWORD=secret
             - MYSQL_DATABASE=kernolab
@@ -35,3 +36,6 @@ services:
         volumes:
             - '.:/application'
             - './phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/8.1/fpm/conf.d/99-overrides.ini'
+
+volumes:
+    kernolab-mysql-volume:
