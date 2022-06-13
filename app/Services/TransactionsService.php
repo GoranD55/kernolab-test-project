@@ -24,6 +24,7 @@ final class TransactionsService
             DB::beginTransaction();
             $transaction = Transaction::create(
                 array_merge($requestData, [
+                    'details' => (new CurrencyProviderService())->formatTransactionDetails($requestData['details'], $requestData['currency']),
                     'fee' => $commissionService->getFeeValue(),
                     'status' => TransactionStatusEnum::NEW
                 ])
