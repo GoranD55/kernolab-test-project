@@ -15,6 +15,13 @@ paths:
         200:
           $ref: '#/components/responses/CreateTransactionResponseData'
     get:
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: integer
+          description: The user ID
       summary: Get list of transactions
       responses:
         200:

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\IndexTransactionsRequest;
 use App\Http\Requests\StoreTransactionRequest;
 use App\Http\Requests\SubmitTransactionRequest;
 use App\Http\Resources\TransactionResource;
@@ -20,9 +21,12 @@ class TransactionsController extends Controller
         $this->transactionsService = $transactionsService;
     }
 
-    public function index(): JsonResource
+    public function index(IndexTransactionsRequest $request): JsonResource
     {
-        return TransactionResource::collection(Transaction::all());
+        $requestData = $request->validated();
+        return TransactionResource::collection(
+            Transaction::query()->where('user_id', $requestData['user_id'])->get()
+        );
     }
 
     public function show(string $transaction_id): TransactionResource | JsonResponse
