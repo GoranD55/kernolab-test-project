@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreTransactionRequest;
 use App\Http\Requests\SubmitTransactionRequest;
 use App\Http\Resources\TransactionResource;
+use App\Models\Transaction;
 use App\Services\TransactionsService;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class TransactionsController extends Controller
 {
@@ -16,6 +18,24 @@ class TransactionsController extends Controller
     public function __construct(TransactionsService $transactionsService)
     {
         $this->transactionsService = $transactionsService;
+    }
+
+    public function index(): JsonResource
+    {
+        return TransactionResource::collection(Transaction::all());
+    }
+
+    public function show(string $transaction_id): TransactionResource | JsonResponse
+    {
+        $transaction = Transaction::query()->find($transaction_id);
+        if (!$transaction) {
+            return response()->json([
+                'status' => false,
+                'reason' => 'Transaction not found!'
+            ], 404);
+        }
+
+        return new TransactionResource($transaction);
     }
 
     public function store(StoreTransactionRequest $request): TransactionResource | JsonResponse
