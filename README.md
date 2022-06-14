@@ -7,6 +7,8 @@
 4. The API is available at http://localhost:8010/
 5. All routes and those descriptions you can find in the file: openApi/swagger.yaml
 
+Here are environment variables in the .env.example file, please use them to launch the project easier. 
+
 #
 ## Useful commands:
 ### Change files permissions
