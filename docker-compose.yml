@@ -2,18 +2,18 @@ version: '3.1'
 services:
     redis:
         image: 'redis:alpine'
-        container_name: kernolab-api-redis
+        container_name: transactions-api-redis
 
     mysql:
         image: 'mysql:8.0'
-        container_name: kernolab-api-mysql
+        container_name: transactions-api-mysql
         working_dir: /application
         volumes:
             - '.:/application'
-            - 'kernolab-mysql-volume:/var/lib/mysql'
+            - 'transactions-mysql-volume:/var/lib/mysql'
         environment:
             - MYSQL_ROOT_PASSWORD=secret
-            - MYSQL_DATABASE=kernolab
+            - MYSQL_DATABASE=database
             - MYSQL_USER=user
             - MYSQL_PASSWORD=password
         ports:
@@ -21,7 +21,7 @@ services:
 
     webserver:
         image: 'nginx:alpine'
-        container_name: kernolab-api-webserver
+        container_name: transactions-api-webserver
         working_dir: /application
         volumes:
             - '.:/application'
@@ -31,7 +31,7 @@ services:
 
     php-fpm:
         build: phpdocker/php-fpm
-        container_name: kernolab-api-php-fpm
+        container_name: transactions-api-php-fpm
         working_dir: /application
         volumes:
             - '.:/application'
@@ -39,4 +39,4 @@ services:
             - './phpdocker/php-fpm/xdebug.ini:/etc/php/8.1/mods-available/xdebug.ini'
 
 volumes:
-    kernolab-mysql-volume:
+    transactions-mysql-volume:

@@ -1,4 +1,4 @@
-# Kernolab-API
+# Transactions-API
 ## First deploy
 
 1. Clone repository

@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Kernolab API
+  title: Transactions API
   description: Stateless API which allows transaction creation and processing
   version: "0.1"
 servers:
